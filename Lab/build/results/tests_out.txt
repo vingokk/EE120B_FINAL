@@ -1,0 +1,2 @@
+Breakpoint 1 at 0xea: file source/main.c, line 24.
+Note: automatically using hardware breakpoints for read-only addresses.
