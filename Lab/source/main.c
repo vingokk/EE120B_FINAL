@@ -8,10 +8,13 @@ enum States{Start, Init, Waitrise, Increment, Decrement, Waitfall}State;
 void Tick();
 
 int main(){
-   DDRA = 0x00; PORTA = 0x0F;
-   DDRC = 0x0F; PORTC = 0x00;
+   DDRA = 0x00; PORTA = 0xFF;
+   DDRC = 0xFF; PORTC = 0x00;
+   unsigned char button = 0x00;
+   unsigned char led = 0x00;
    State = Start;
    while(1){
+   	  button = (~PINA & 0x03);
       Tick();      
    }
   return 0;
@@ -20,26 +23,26 @@ void Tick(){
    
    switch(State){
       case Start:
-             PORTC = 0x07;
+             led = 0x07;
 	     State = Init;
 	     break;
 	  
 	  case Init:
-             PORTC = 0x07;
+             led = 0x07;
 	     State = Waitrise;
 	     break;
 	  
 	  case Waitrise:
-	     if(!(PINA&0x01) && !(PINA&0x02)){
+	     if(!(button&0x01) && !(button&0x02)){
 	     State = Waitrise;
 	     }
-	     else if(!(PINA&0x01) && (PINA&0x02) ){
+	     else if(!(button&0x01) && (button&0x02) ){
 	     State = Decrement;
 	     }
-	     else if((PINA&0x01) && !(PINA&0x02)){
+	     else if((button&0x01) && !(button&0x02)){
 	     State = Increment;
 	     }
-	     else if((PINA&0x01) && (PINA&0x02)){
+	     else if((button&0x01) && (button&0x02)){
 	     State = Init;
 	     }
 	     break;
@@ -53,13 +56,13 @@ void Tick(){
 	     break;
 	  
 	  case Waitfall:
-	     if((PINA&0x01) ^ (PINA&0x02)){
+	     if((button&0x01) ^ (button&0x02)){
 	     State = Waitfall;
 	     }
-	     else if(!(PINA&0x01) && !(PINA&0x02)){
+	     else if(!(button&0x01) && !(button&0x02)){
 	     State = Waitrise;
 	     }
-	     else if((PINA&0x01) && (PINA&0x02)){
+	     else if((button&0x01) && (button&0x02)){
 	     State = Init;
 	     }
 	     break;
@@ -73,33 +76,33 @@ void Tick(){
 	  break;
 	  
       case Init:
-	     PORTC = 0x07;
+	     led = 0x07;
 		 break;
 		
 	  case Waitrise:
-	     PORTC = PORTC;
+	     led = led;
 	     break;
 		 
 	  case Increment:
-	     if(PORTC < 9){
-	     PORTC = PORTC + 1;
+	     if(led < 9){
+	     led = led + 1;
 		 }
 		 break;
 		 
 	  case Decrement:
-	     if(PORTC > 0){
-	     PORTC = PORTC - 1;
+	     if(led > 0){
+	     led = led - 1;
 	     }
 		break;
 
           case Waitfall:
-               PORTC = PORTC;
+               led = led;
  
 	   default:
-             PORTC = PORTC;   
+             led = led;   
 	     break;
    
    }
-            
-
+   
+   PORTC = led;           
 }
