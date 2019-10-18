@@ -13,24 +13,60 @@
 #endif
 
 int main(void) {
-    /* Insert DDR and PORT initializations */
-        DDRA = 0x00; PORTA = 0xFF;
-        DDRB = 0xFF; PORTB = 0x00;
 
-        unsigned char button = 0x00;
-        unsigned char led = 0x00;
+    DDRA = 0x00; DDRC = 0xFF;
+    PORTA = 0xFF; PORTC = 0x00;
+    unsigned char led  = 0x00;
+    unsigned char button = 0x00;
 
-    /* Insert your solution below */
-    while (1) {
-	button = ~PINA & 0x01;
-
-        if(button){
-           led = (led & 0xFC) | 0x01;
+    while(1){
+        switch (PINA & 0x0F) {
+        case 1:  
+        PORTC =  0x60;
+        break;
+        case 2:
+        PORTC =  0x60;
+        break;
+        case 3:
+        PORTC =  0x70;
+        break;
+        case 4:
+        PORTC =  0x70;
+        break;
+        case 5:
+        PORTC =  0x38;
+        break;
+        case 6:
+        PORTC =  0x38;
+        break;
+        case 7:
+        PORTC =  0x3C;
+        break;
+        case 8:
+        PORTC =  0x3C;
+        break;
+        case 9:
+        PORTC =  0x3C;
+        break;
+        case 10:
+        PORTC =  0x3E;
+        break;
+        case 11:
+        PORTC =  0x3E;
+        break;
+        case 12:
+        PORTC =  0x3E;
+        break;
+        case 13:
+        PORTC =  0x3F;
+        break;
+        case 14:
+        PORTC =  0x3F;
+        break;
+        case 15:
+        PORTC =  0x3F;
+        break;
         }
-        else {
-           led = (led & 0xFC) | 0x02;
-        }
-        PORTB = led;
     }
     return 1;
 }
