@@ -6,29 +6,30 @@
 
 enum States{Start, Init, Waitrise, Increment, Decrement, Waitfall}State;
 void Tick();
+unsigned char button = 0x00;
+unsigned char led = 0x00;
 
 int main(){
    DDRA = 0x00; PORTA = 0xFF;
    DDRC = 0xFF; PORTC = 0x00;
-   unsigned char button = 0x00;
-   unsigned char led = 0x00;
+   
    State = Start;
    while(1){
-   	  button = (~PINA & 0x03);
+   	  
       Tick();      
    }
   return 0;
   } 
 void Tick(){
-   
+   button = (~PINA & 0x03);
    switch(State){
       case Start:
-             led = 0x07;
+             led = 0x00;
 	     State = Init;
 	     break;
 	  
 	  case Init:
-             led = 0x07;
+             led = 0x00;
 	     State = Waitrise;
 	     break;
 	  
@@ -76,7 +77,7 @@ void Tick(){
 	  break;
 	  
       case Init:
-	     led = 0x07;
+	     led = 0x00;
 		 break;
 		
 	  case Waitrise:

@@ -25,6 +25,7 @@ int main(void) {
         switch (button) {
 	case 0:
 	   led  =  0x40;
+	   break;
         case 1:  
            led  =  0x60;
            break;
