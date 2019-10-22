@@ -15,7 +15,7 @@
 
 volatile unsigned char TimerFlag = 0x00;
 unsigned char temp = 0x00;
-unsigned int cnt = 0;
+
 unsigned long _avr_timer_M = 1;
 unsigned long _avr_timer_cntcurr = 0;
 unsigned char button =0x00;
@@ -47,13 +47,11 @@ void TimerSet(unsigned long M){
 }
 
 
-enum Led_States{Start, Init, ON_1, Wait_1, ON_2, Wait_2, ON_3, Wait_3 } Led_State;
+enum Led_States{Start, Init, Down, Stop, Up } Led_State;
 void Tick_Led();
 int main(void){
-        DDRA = 0x00;
-        PORTA = 0xFF;
-	DDRB = 0xFF; 
-	PORTB = 0x00;
+        DDRA = 0x00;   PORTA = 0xFF;
+	DDRB = 0xFF; 	PORTB = 0x00;
 	TimerSet(300);
 	TimerOn();
 	Led_State = Start;
@@ -67,102 +65,75 @@ int main(void){
 void Tick_Led(){
         unsigned char button =(~PINA &0x01);
 	switch(Led_State){
-		case Start:
-		   	Led_State = Init;
-			break;
-		case Init:
-		  Led_State = ON_1;
-			break;
-		case ON_1:
-			Led_State = Wait_1;
-			break;
-	        case Wait_1:
-		  if(!button && !cnt){
-		     Led_State = ON_2;		    
-		  }  
-		  else if(button ){
-		     ++cnt;
-		     Led_State = Wait_1;
-		  }
-		  else if(cnt==1){
-		     Led_State = Wait_1;	     
-		  } 
-		  else if(cnt>1){
-		     Led_State =  Init;
-		  }  
-                  break;
+	   case Start:
+	      Led_State = Init;
+	      break;
 
-	        case ON_2:
-		        Led_State = Wait_2;
-			break;
+	   case Init:
+	      Led_State = Down;
+	      break;
 
-	        case  Wait_2:
-		  if(!button && !cnt){
-		     Led_State = ON_3;		    
-		  }  
-		  else if(button ){
-		     ++cnt;
-		     Led_State = Wait_2;
-		  }
-		  else if(cnt==1){
-		     Led_State = Wait_2;	     
-		  } 
-		  else if(cnt>1){
-		     Led_State =  Init;
-		  }  
-		  break;
-     
-          	case ON_3:
-		        Led_State = Wait_3;
-			break;
+	   case Down:
+	     if(!button && (temp==0x04)){
+	       Led_State = Up;
+	     }
+	     else if(button){	       
+               Led_State = Stop;
+	     }
+	     else{
+	       Led_State = Down;
+	     }
+	     break;
 
-	        case Wait_3:
-		  if(!button && !cnt){
-		     Led_State = ON_1;		    
-		  }  
-		  else if(button ){
-		     ++cnt;
-		     Led_State = Wait_3;
-		  }
-		  else if(cnt==1){
-		     Led_State = Wait_3;	     
-		  } 
-		  else if(cnt>1){
-		     Led_State =  Init;
-		  }  
-		  break;
-		default:
-			break;
+	   case Stop:
+	     if(!button){
+	       Led_State = Stop;
+	     }
+	     else if(button){	       
+               Led_State = Init;
+	     }
+	     else{
+	       Led_State = Stop;
+	     }
+	     break;
+
+           case Up:
+	     if(!button && (temp==0x01)){
+	       Led_State = Down;
+	     }
+	     else if(button){	       
+               Led_State = Stop;
+	     }
+	     else{
+	       Led_State = Up;
+	     }
+	     break;
+	
+	   default:
+	   break;
 	}
 
 
 
-	switch(Led_State){
-		case Start:
-			temp = 0x00;
-			cnt = 0;
-			break;
-		case Init:
-			temp = 0x00;
-			cnt = 0;
-			break;
-		case ON_1:
-		        temp = 0x01;
-			break;
-		case Wait_1:
-		        break;
-		case ON_2:
-		       temp = 0x02;
-			break;
-		case Wait_2:
-		        break;
-          	case ON_3:
-		       temp = 0x04;
-			break;
-		case Wait_3:
-		        break;
-		default:
-			break;	
+     switch(Led_State){
+	 case Start:
+	    temp = 0x00;
+	    break;
+	 case Init:
+	    temp = 0x01;
+	    break;
+
+         case Down:
+	    temp = temp << 1;
+	    break;
+         case Stop:
+            temp = temp;
+            break;
+         case Up:
+	    temp = temp >> 1;
+	    break;	
+	default:
+	    break;	
 	}
 	PORTB = temp;
 	
