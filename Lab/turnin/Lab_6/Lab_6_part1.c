@@ -15,10 +15,9 @@
 
 volatile unsigned char TimerFlag = 0x00;
 unsigned char temp = 0x00;
-unsigned int cnt = 0;
 unsigned long _avr_timer_M = 1;
 unsigned long _avr_timer_cntcurr = 0;
-unsigned char button =0x00;
+
 void TimerOn(){
 	TCCR1B = 0x0B;
 	OCR1A = 125;
@@ -47,14 +46,13 @@ void TimerSet(unsigned long M){
 }
 
 
-enum Led_States{Start, Init, ON_1, Wait_1, ON_2, Wait_2, ON_3, Wait_3 } Led_State;
+enum Led_States{Start, Init, ON_1, ON_2, ON_3} Led_State;
 void Tick_Led();
 int main(void){
-        DDRA = 0x00;
-        PORTA = 0xFF;
+	
 	DDRB = 0xFF; 
 	PORTB = 0x00;
-	TimerSet(300);
+	TimerSet(100);
 	TimerOn();
 	Led_State = Start;
 	while(1){
@@ -65,7 +63,6 @@ int main(void){
         }
 }
 void Tick_Led(){
-        unsigned char button =(~PINA &0x01);
 	switch(Led_State){
 		case Start:
 		   	Led_State = Init;
@@ -74,93 +71,34 @@ void Tick_Led(){
 		  Led_State = ON_1;
 			break;
 		case ON_1:
-			Led_State = Wait_1;
+			Led_State = ON_2;
 			break;
-	        case Wait_1:
-		  if(!button && !cnt){
-		     Led_State = ON_2;		    
-		  }  
-		  else if(button ){
-		     ++cnt;
-		     Led_State = Wait_1;
-		  }
-		  else if(cnt==1){
-		     Led_State = Wait_1;	     
-		  } 
-		  else if(cnt>1){
-		     Led_State =  Init;
-		  }  
-                  break;
-
-	        case ON_2:
-		        Led_State = Wait_2;
+		case ON_2:
+		        Led_State = ON_3;
 			break;
-
-	        case  Wait_2:
-		  if(!button && !cnt){
-		     Led_State = ON_3;		    
-		  }  
-		  else if(button ){
-		     ++cnt;
-		     Led_State = Wait_2;
-		  }
-		  else if(cnt==1){
-		     Led_State = Wait_2;	     
-		  } 
-		  else if(cnt>1){
-		     Led_State =  Init;
-		  }  
-		  break;
-     
           	case ON_3:
-		        Led_State = Wait_3;
+		        Led_State = ON_1;
 			break;
-
-	        case Wait_3:
-		  if(!button && !cnt){
-		     Led_State = ON_1;		    
-		  }  
-		  else if(button ){
-		     ++cnt;
-		     Led_State = Wait_3;
-		  }
-		  else if(cnt==1){
-		     Led_State = Wait_3;	     
-		  } 
-		  else if(cnt>1){
-		     Led_State =  Init;
-		  }  
-		  break;
 		default:
 			break;
 	}
 
-
-
 	switch(Led_State){
 		case Start:
 			temp = 0x00;
-			cnt = 0;
 			break;
 		case Init:
 			temp = 0x00;
-			cnt = 0;
 			break;
 		case ON_1:
 		        temp = 0x01;
 			break;
-		case Wait_1:
-		        break;
 		case ON_2:
 		       temp = 0x02;
 			break;
-		case Wait_2:
-		        break;
           	case ON_3:
 		       temp = 0x04;
 			break;
-		case Wait_3:
-		        break;
 		default:
 			break;	
 	}
