@@ -1,24 +1,26 @@
 /*	Author: wenguang wang
  *      Partner(s) Name: xikang luo
  *	Lab Section:022
- *	Assignment: Lab #6  Exercise #1
+ *	Assignment: Lab #7  Exercise #1
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
  *	code, is my own original work.
  */
 #include <avr/io.h>
+#include "io.h"
 #include <avr/interrupt.h>
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
 #endif
 
 volatile unsigned char TimerFlag = 0x00;
-unsigned char temp = 0x00;
+unsigned int tempC = 0;
+unsigned char button0 = 0x00;
+unsigned char button1 = 0x00;
 
 unsigned long _avr_timer_M = 1;
 unsigned long _avr_timer_cntcurr = 0;
-unsigned char button =0x00;
 void TimerOn(){
 	TCCR1B = 0x0B;
 	OCR1A = 125;
@@ -47,48 +49,53 @@ void TimerSet(unsigned long M){
 }
 
 
-enum Led_States{Start, Init, Waitrise, Increment, Decrement, Waitfall } Led_State;
+enum States{Start, Init, Waitrise, Increment, Decrement, Waitfall }State;
 void Tick_Led();
 
 int main(void){
         DDRA = 0x00;   PORTA = 0xFF;
 	DDRC = 0xFF;   PORTC = 0x00;
 	DDRD = 0xFF;   PORTD = 0x00;
-	TimerSet(300);
+
+        LCD_init();
+
+	TimerSet(500);
 	TimerOn();
-	Led_State = Start;
+	State = Start;
 	while(1){
 	   Tick_Led();
-	while(!TimerFlag){}
-	TimerFlag = 0;
-	
+           LCD_ClearScreen();
+           LCD_Cursor(1);
+           LCD_WriteData (tempC + '0');
+	   while(!TimerFlag){}
+           TimerFlag = 0;
         }
 }
 void Tick_Led(){
-        unsigned char button =(~PINA &0x02);
-	
+   unsigned char button0 = (~PINA & 0x01);
+   unsigned char button1 = (~PINA & 0X02);
    switch(State){
-      case Start:
-             temC = 0x00;
+           case Start:
+             tempC= 0;
 	     State = Init;
 	     break;
 	  
 	  case Init:
-             PORTC = 0x07;
+             tempC = 0;
 	     State = Waitrise;
 	     break;
 	  
 	  case Waitrise:
-	     if(!(PINA&0x01) && !(PINA&0x02)){
+	     if(!button0 && !button1){
 	     State = Waitrise;
 	     }
-	     else if(!(PINA&0x01) && (PINA&0x02) ){
+	     else if(!button0 && button1 ){
 	     State = Decrement;
 	     }
-	     else if((PINA&0x01) && !(PINA&0x02)){
+	     else if(button0 && !button1){
 	     State = Increment;
 	     }
-	     else if((PINA&0x01) && (PINA&0x02)){
+	     else if(button0 && button1){
 	     State = Init;
 	     }
 	     break;
@@ -102,14 +109,17 @@ void Tick_Led(){
 	     break;
 	  
 	  case Waitfall:
-	     if((PINA&0x01) ^ (PINA&0x02)){
-	     State = Waitfall;
+	     if(!button0 && button1){
+	       State = Decrement;
 	     }
-	     else if(!(PINA&0x01) && !(PINA&0x02)){
-	     State = Waitrise;
+	     else if(button0 && !button1){
+	       State = Increment;
 	     }
-	     else if((PINA&0x01) && (PINA&0x02)){
-	     State = Init;
+	     else if(button0 && button1){
+	       State = Init;
+	     }
+	     else{
+	       State = Waitrise;
 	     }
 	     break;
 	  
@@ -122,36 +132,34 @@ void Tick_Led(){
 	  break;
 	  
       case Init:
-	     PORTC = 0x07;
+	     tempC = 0;
 		 break;
 		
 	  case Waitrise:
-	     PORTC = PORTC;
+	     tempC = tempC;
 	     break;
 		 
 	  case Increment:
-	     if(PORTC < 9){
-	     PORTC = PORTC + 1;
+	     if(tempC < 9){
+	     tempC = tempC + 1;
 		 }
 		 break;
 		 
 	  case Decrement:
-	     if(PORTC > 0){
-	     PORTC = PORTC - 1;
+	     if(tempC > 0){
+	     tempC = tempC - 1;
 	     }
 		break;
 
           case Waitfall:
-               PORTC = PORTC;
- 
-	   default:
-             PORTC = PORTC;   
-	     break;
+               tempC = tempC;
+	       break;
+	  default:
+               tempC = tempC;   
+	       break;
    
    }	   
 
-    
-	PORTB = temp;
 	
 }
 
