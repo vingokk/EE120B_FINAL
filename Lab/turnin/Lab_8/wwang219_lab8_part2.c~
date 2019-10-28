@@ -1,7 +1,7 @@
 /*	Author: wenguang wang
  *      Partner(s) Name: xikang luo
  *	Lab Section:022
- *	Assignment: Lab #8  Exercise #3
+ *	Assignment: Lab #8  Exercise #2
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
@@ -14,8 +14,6 @@
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
 #endif
-
-#define MAX 0x09F
 
 void ADC_init();
 
@@ -32,14 +30,11 @@ int main(void){
 
    while(1){
       x = ADC;
-      if ( x >= MAX/2){
-	temB = 0x01;
-      }
-      else{
-        temB = 0x00;
-      }
-
+      temB = (char) x;
+      temD = (char) (x >> 8);
       PORTB = temB;
+      PORTD = temD;
+
 
    }
 
@@ -54,6 +49,6 @@ void ADC_init(){
 ADCSRA |= (1 << ADEN) | (1 << ADSC) | (1 << ADATE);
 }
 
-/* MAX ==
+/* MAX ==32
  * MIN == 1024
  */
