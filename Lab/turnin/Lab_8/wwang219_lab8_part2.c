@@ -1,11 +1,11 @@
-/*	Author: wenguang wang
- *      Partner(s) Name: xikang luo
- *	Lab Section:022
- *	Assignment: Lab #8  Exercise #2
- *	Exercise Description: [optional - include for your own benefit]
+  /*    Author: Wenguang Wang        Email:wangwenguang98@gmail.com
+ *      Partner(s) Name: xikang luo  Email: luoxikang@csu.edu.cn
+ *      Lab Section: 022 
+ *      Assignment: Lab #8  Exercise #2 
+ *      Exercise Description: [optional - include for your own benefit]
  *
- *	I acknowledge all content contained herein, excluding template or example
- *	code, is my own original work.
+ *      I acknowledge all content contained herein, excluding template or example
+ *      code, is my own original work.
  */
 
 
