@@ -7,7 +7,7 @@
  *	I acknowledge all content contained herein, excluding template or example
  *	code, is my own original work.
  */
-#include "RIMS.h"
+
 #include <avr/io.h>
 #include "io.h"
 #include <avr/interrupt.h>

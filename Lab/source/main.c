@@ -18,32 +18,11 @@
 
 unsigned long _avr_timer_M = 1;
 unsigned long _avr_timer_cntcurr = 0;
-void TimerOn(){
-	TCCR1B = 0x0B;
-	OCR1A = 125;
-	TIMSK1 = 0x02;
-	TCNT1 = 0;
-	_avr_timer_cntcurr = _avr_timer_M;
-	SREG |= 0x80;
-}
-void TimerOff(){
-	TCCR1B = 0x00;
-}
-
-ISR(TIMER1_COMPA_vect){
-	_avr_timer_cntcurr--;
-	if(_avr_timer_cntcurr == 0){
-		TimerISR();
-		_avr_timer_cntcurr = _avr_timer_M;
-	}
-}
-void TimerSet(unsigned long M){
-	_avr_timer_M = M;
-	_avr_timer_cntcurr = _avr_timer_M;
-}
-
-
-
+void TimerOn();
+void TimerISR();
+void TimerOff();
+ISR(TIMER1_COMPA_vect);
+void TimerSet(unsigned long M);
 
 
 
@@ -54,9 +33,9 @@ typedef struct task{
   int(*TickFct)(int);
 }task;
 
-task tasks[3];
+task tasks[2];
 
-const unsigned char tasksNum = 3;
+const unsigned char tasksNum = 2;
 const unsigned long periodThreeLEDs = 1000;
 const unsigned long periodBlinkingLED = 1000;
 const unsigned long tasksPeriodGCD = 1000;
@@ -68,20 +47,15 @@ int TickFct_ThreeLEDs(int state);
 enum Bl_States{BL_Start, BL_S1, BL_S2} BL_State;
 int TickFct_BlinkingLED(int state);
 
-void TimerISR(){
-   unsigned char i = 0;
-   for(i = 0; i < tasksNum; ++i){
-     if(tasks[i].elapsedTime >= tasks[i].period){
-       tasks[i].state = tasks[i].TickFct(tasks[i].state);
-       tasks[i].elapsedTime = 0;
-     }
-     tasks[i].elapsedTime += tasksPeriodGCD;
-   } 
+void TickFct_CombineLEDs();
 
-}
 
 
 int main(){
+  DDRB = 0xFF; PORTB = 0x00;
+
+
+
    unsigned char i = 0;
    tasks[i].state =TL_Start;
    tasks[i].period = periodThreeLEDs;
@@ -96,10 +70,11 @@ int main(){
    tasks[i].TickFct = & TickFct_BlinkingLED;
 
    TimerSet(tasksPeriodGCD);
-   TimerOn;
+   TimerOn();
 
    while(1){
-      sleep();
+     /* Sleep();
+      */
    }
 
 
@@ -120,8 +95,12 @@ switch(state){
    state = TL_S2;
    break;
 
+ case TL_S2:
+   state = TL_S3;
+   break;
+
  case TL_S3:
-   state = TL_S1
+   state = TL_S1;
    break;
 
  default:
@@ -197,5 +176,48 @@ switch(state){
 }
 
  return state;
+
+}
+
+void TickFct_CombineLEDs(){
+  PORTB = tempBL | tempTL;
+}
+
+
+void TimerOn(){
+	TCCR1B = 0x0B;
+	OCR1A = 125;
+	TIMSK1 = 0x02;
+	TCNT1 = 0;
+	_avr_timer_cntcurr = _avr_timer_M;
+	SREG |= 0x80;
+}
+void TimerOff(){
+	TCCR1B = 0x00;
+}
+
+ISR(TIMER1_COMPA_vect){
+	_avr_timer_cntcurr--;
+	if(_avr_timer_cntcurr == 0){
+		TimerISR();
+		_avr_timer_cntcurr = _avr_timer_M;
+	}
+}
+
+void TimerSet(unsigned long M){
+	_avr_timer_M = M;
+	_avr_timer_cntcurr = _avr_timer_M;
+}
+
+void TimerISR(){
+   unsigned char i = 0;
+   for(i = 0; i < tasksNum; ++i){
+     if(tasks[i].elapsedTime >= tasks[i].period){
+       tasks[i].state = tasks[i].TickFct(tasks[i].state);
+       tasks[i].elapsedTime = 0;
+     }
+     tasks[i].elapsedTime += tasksPeriodGCD;
+   } 
+   TickFct_CombineLEDs();
 
 }
