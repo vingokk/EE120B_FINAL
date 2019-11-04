@@ -1,7 +1,7 @@
   /*    Author: Wenguang Wang        Email:wangwenguang98@gmail.com
  *      Partner(s) Name: xikang luo  Email: luoxikang@csu.edu.cn
  *      Lab Section: 022 
- *      Assignment: Lab #10 Exercise #3
+ *      Assignment: Lab #10  Exercise #3
  *      Exercise Description: [optional - include for your own benefit]
  *
  *      I acknowledge all content contained herein, excluding template or example

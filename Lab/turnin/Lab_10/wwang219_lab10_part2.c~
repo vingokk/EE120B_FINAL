@@ -1,11 +1,11 @@
-  /*    Author: Wenguang Wang        Email:wangwenguang98@gmail.com
- *      Partner(s) Name: xikang luo  Email: luoxikang@csu.edu.cn
- *      Lab Section: 022 
- *      Assignment: Lab #10 Exercise #3
- *      Exercise Description: [optional - include for your own benefit]
+/*	Author: wenguang wang
+ *      Partner(s) Name: xikang luo
+ *	Lab Section:022
+ *	Assignment: Lab #10  Exercise #2
+ *	Exercise Description: [optional - include for your own benefit]
  *
- *      I acknowledge all content contained herein, excluding template or example
- *      code, is my own original work.
+ *	I acknowledge all content contained herein, excluding template or example
+ *	code, is my own original work.
  */
 
 
@@ -33,13 +33,12 @@ typedef struct task{
   int(*TickFct)(int);
 }task;
 
-task tasks[3];
+task tasks[2];
 
-const unsigned char tasksNum = 3;
+const unsigned char tasksNum = 2;
 const unsigned long periodThreeLEDs = 300;
 const unsigned long periodBlinkingLED = 1000;
-const unsigned long periodBuffer = 2  ;
-const unsigned long tasksPeriodGCD = 2  ;
+const unsigned long tasksPeriodGCD = 100;
 
 
 enum TL_States{TL_Start,TL_S1,TL_S2, TL_S3} TL_State;
@@ -48,16 +47,11 @@ int TickFct_ThreeLEDs(int state);
 enum Bl_States{BL_Start, BL_S1, BL_S2} BL_State;
 int TickFct_BlinkingLED(int state);
 
-enum BF_States{BF_Start, BF_ON, BF_OFF}BF_State;
-int TickFct_Buffer(int state);
-
-
-void TickFct_Combine();
+void TickFct_CombineLEDs();
 
 
 
 int main(){
-  DDRA = 0x00; PORTA = 0xFF;
   DDRB = 0xFF; PORTB = 0x00;
 
 
@@ -74,12 +68,6 @@ int main(){
    tasks[i].period = periodBlinkingLED;
    tasks[i].elapsedTime = tasks[i].period;
    tasks[i].TickFct = & TickFct_BlinkingLED;
-
-   ++i;
-   tasks[i].state = BF_Start;
-   tasks[i].period = periodBuffer;
-   tasks[i].elapsedTime = tasks[i].period;
-   tasks[i].TickFct = & TickFct_Buffer;
 
    TimerSet(tasksPeriodGCD);
    TimerOn();
@@ -172,7 +160,7 @@ switch(state){
 
  case BL_Start:
    tempBL = 0x00;
-   state = BL_S1;
+   state = TL_S1;
    break;
 
  case BL_S1:
@@ -191,65 +179,8 @@ switch(state){
 
 }
 
-unsigned char tempBF = 0x00;
-unsigned char button = 0x00;
-int TickFct_Buffer(int state){
-
-  button = ~PINA & 0x04;
- 
-switch(state){
-
- case BF_Start:
-   tempBF = 0x00;
-   state = BF_ON;
-   break;
-
- case BF_ON:
-   state = BF_OFF;
-   break;
-
- case BF_OFF:
-   state = BF_ON;
-   break;
-
- default:
-   state = BF_Start;
-   break; 
-}
-
-
-switch(state){
-
- case BF_Start:
-   tempBF = 0x00;
-   state = BF_ON;
-   break;
-
- case BF_ON:
-    if(button){
-   tempBF = 0x10;
-    }
-    
-   break;
-
- case BF_OFF:
-   tempBF = 0x00;
-   break;
-
- default:
-   break; 
-}
-
- return state;
-  
-
-
-}
-
-
-
-void TickFct_Combine(){
-  PORTB = tempBL | tempTL | tempBF;
+void TickFct_CombineLEDs(){
+  PORTB = tempBL | tempTL;
 }
 
 
@@ -287,6 +218,6 @@ void TimerISR(){
      }
      tasks[i].elapsedTime += tasksPeriodGCD;
    } 
-   TickFct_Combine();
+   TickFct_CombineLEDs();
 
 }
